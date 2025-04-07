@@ -1,0 +1,14 @@
+logging: "debug" # Debug or Info. Level of logging shown in console.
+session_cookie: "" # Use a browser console to get this after Klefki login. Must be updated on Klefki restart. 
+discord_id: "" # Used in Klefki API. 
+discord_webhook: "" # Webhook used to send updates/errors.
+auth:
+  user: "" # Leave empty if no Rotom auth user
+  pass: "" # Leave empty if no Rotom auth pass
+urls:
+  status: "https://api.klefkiv2.sylvie.fyi/api/v1/devices/" # Klefki API URL
+  resolve: "" # Your Rotom URL, include port.
+devices: # List ALL devices. Include 0 config devices if using deviceless.
+  device1: 5
+  Device 2: 5
+  device 3: 0

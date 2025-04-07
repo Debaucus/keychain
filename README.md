@@ -12,12 +12,15 @@ This script checks the status of devices in the Klefki system and resolves issue
 ## Requirements
 
 - Python 3.x
+- Klefki Session Cookie
 
 You can install the required libraries using `pip`:
 
 ```bash
 pip install -r .\requrements.txt
 ```
+
+Login to Klefki and use browser console to extract your Session Cookie value. Use this in the `config.yaml`. This resets when Klefki is restarted, a dedicated error message is made to tag you in order to update this.
 
 ## Configuration
 

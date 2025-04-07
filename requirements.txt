@@ -1,5 +1,2 @@
 requests
-yaml
-time
-json
 pyyaml

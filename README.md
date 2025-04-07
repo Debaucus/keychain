@@ -36,7 +36,7 @@ auth:
   pass: "" # Optional: Password for Rotom authentication.
 urls:
   status: "https://api.klefki.sylvie.fyi/api/v1/devices/" # Klefki status API endpoint URL.
-  resolve: "" # Rotom resolve API endpoint URL (for triggering device restarts).
+  rotom: "" # Rotom API endpoint URL, including port (for triggering device restarts).
 devices: 
   device1: 5   # Example: Device name with expected worker count.
   Device 2: 10
@@ -52,7 +52,7 @@ devices:
 - **auth**: Optional authentication parameters for Rotom API (`user` and `pass`).
 - **urls**:
   - `status`: The Klefki API URL to fetch device statuses.
-  - `resolve`: The Rotom URL to trigger device restarts.
+  - `rotom`: The Rotom URL to trigger device restarts, needs port. 
 - **devices**: A list of devices, with the expected number of workers. Devices with `0` authed workers when they have a higher value will trigger a restart request.
 
 ## Usage

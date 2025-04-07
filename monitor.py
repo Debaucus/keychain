@@ -47,7 +47,7 @@ def get_device_status(config):
         raise
 
 def resolve_device_issue(device, config):
-    base_url = config["urls"]["resolve"]
+    base_url = config["urls"]["rotom"]
     restart_url = f"{base_url}/api/device/{device}/action/restart"
 
     # Only add auth if user/pass are not empty

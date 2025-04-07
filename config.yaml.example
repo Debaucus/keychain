@@ -7,7 +7,7 @@ auth:
   pass: "" # Leave empty if no Rotom auth pass
 urls:
   status: "https://api.klefkiv2.sylvie.fyi/api/v1/devices/" # Klefki API URL
-  resolve: "" # Your Rotom URL, include port.
+  rotom: "" # Your Rotom URL, include port.
 devices: # List ALL devices. Include 0 config devices if using deviceless.
   device1: 5
   Device 2: 5

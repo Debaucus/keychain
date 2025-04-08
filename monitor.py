@@ -137,6 +137,8 @@ def send_discord_message(config, message):
 def main():
     config = load_config()
 
+    send_discord_message(config, "Keychain - Klefki Monitor started.")
+
     while True:
         try:
             check_and_resolve(config)

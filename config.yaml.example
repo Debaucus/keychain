@@ -22,7 +22,7 @@ docker_containers: # Container names related to the device.
   Device 2: redroid2
 
 # Device Settings
-devices: # List local devices where keychain is being run.
+devices: # List local devices where keychain is being run. State the config auth value.
   device1: 5
   Device 2: 5
   device 3: 0

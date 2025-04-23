@@ -25,7 +25,7 @@ def get_device_status(config):
             error_message = (f"❌ Status endpoint returned {response.status_code}: {response.text}")
             
             if response.status_code == 400 and "session not found" in response.text.lower():
-                session_error_message = f"<@{config['discord_id']}> Klefki connection error - Session Key Invalid. May need updating!"
+                session_error_message = f"<@{config['discord_id']}> Klefki connection error - Session Key Invalid."
                 send_discord_message(config, session_error_message)
             else:
                 discord_message = (f"<@{config['discord_id']}> Klefki connection error - {response.status_code} - {response.text}")
@@ -74,12 +74,12 @@ def restart_docker_container(device_name, config):
         send_discord_message(config, msg)
 
     except subprocess.CalledProcessError as e:
-        error_msg = f"🔴 Docker restart failed for `{container_name}`: {e}"
+        error_msg = f"🔴 <@{config['discord_id']}> Docker restart failed for `{container_name}`: {e}"
         print(error_msg)
         send_discord_message(config, error_msg)
 
     except FileNotFoundError as e:
-        error_msg = f"🔴 Docker command not found: {e}. Check if Docker is installed and available in PATH."
+        error_msg = f"🔴 <@{config['discord_id']}> Docker command not found: {e}. Check if Docker is installed and available in PATH."
         print(error_msg)
         send_discord_message(config, error_msg)
 

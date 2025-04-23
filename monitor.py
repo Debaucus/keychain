@@ -124,9 +124,15 @@ def check_and_resolve(config):
         normalized_device = device.strip().lower()
 
         if normalized_device not in device_map:
-            warning_message = f"⚠️  Warning: '{device}' not found in status data."
+            failure_counters[normalized_device] = failure_counters.get(normalized_device, 0) + 1
+            warning_message = f"❌ {device} not found in status data. Failure count: {failure_counters[normalized_device]}/5"
             print(warning_message)
             send_discord_message(config, warning_message)  # Send to Discord
+
+            if failure_counters[normalized_device] >= 5:
+                print(f"🔥 Restarting container for {device} due to repeated absence from status data.")
+                restart_docker_container(device, config)
+                failure_counters[normalized_device] = 0  # Reset after restart
             continue
 
         device_status = device_map[normalized_device]

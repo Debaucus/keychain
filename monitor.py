@@ -51,12 +51,16 @@ def get_device_status(config):
 def restart_docker_container(device_name, config):
     container_name = config.get("docker_containers", {}).get(device_name)
     if not container_name:
-        print(f"❌ No container mapped for {device_name}")
+        msg = f"❌ No container mapped for {device_name}"
+        print(msg)
+        send_discord_message(config, msg)
         return
 
     container_path = config.get("docker_container_path")
     if not container_path:
-        print("❌ Docker container path not set in config.")
+        msg = "❌ Docker container path not set in config."
+        print(msg)
+        send_discord_message(config, msg)
         return
 
     try:
@@ -68,11 +72,21 @@ def restart_docker_container(device_name, config):
         msg = f"<@{config['discord_id']}> Restarted Docker container `{container_name}` for device `{device_name}` after 5 failures."
         print(msg)
         send_discord_message(config, msg)
+
     except subprocess.CalledProcessError as e:
-        error_msg = f"🔴 Docker restart failed for {container_name}: {e}"
+        error_msg = f"🔴 Docker restart failed for `{container_name}`: {e}"
         print(error_msg)
         send_discord_message(config, error_msg)
 
+    except FileNotFoundError as e:
+        error_msg = f"🔴 Docker command not found: {e}. Check if Docker is installed and available in PATH."
+        print(error_msg)
+        send_discord_message(config, error_msg)
+
+    finally:
+        # Always reset failure counter even if restart fails
+        normalized_device = device_name.strip().lower()
+        failure_counters[normalized_device] = 0
 
 def resolve_device_issue(device, config):
     base_url = config["urls"]["rotom"]
@@ -82,6 +96,7 @@ def resolve_device_issue(device, config):
     auth = None
     user = config.get("auth", {}).get("user")
     password = config.get("auth", {}).get("pass")
+    normalized_device = device.strip().lower()
     if user and password:
         auth = (user, password)
 
@@ -96,7 +111,7 @@ def resolve_device_issue(device, config):
             print(error_message)
             send_discord_message(config, discord_message)  # Send to Discord
         else:
-            success_message = f"Restart triggered on {device} - 0 Workers Detected."
+            success_message = f"Restart triggered on {device} - 0 Workers Detected. {failure_counters[normalized_device]}/5."
             print(success_message)
             send_discord_message(config, success_message)  # Send to Discord
 
@@ -132,7 +147,6 @@ def check_and_resolve(config):
             if failure_counters[normalized_device] >= 5:
                 print(f"🔥 Restarting container for {device} due to repeated absence from status data.")
                 restart_docker_container(device, config)
-                failure_counters[normalized_device] = 0  # Reset after restart
             continue
 
         device_status = device_map[normalized_device]
@@ -141,34 +155,21 @@ def check_and_resolve(config):
 
         if workers_authorized == 0:
             print(f"{device} has 0 authorized workers. Attempting resolution...")
-            resolve_device_issue(device, config)
-
-            time.sleep(60)
-            retry_data = get_device_status(config).get("devices", [])
-            retry_map = {
-                dev.get("device_name", "").strip().lower(): dev
-                for dev in retry_data
-            }
-            retry_status = retry_map.get(normalized_device, {})
-            retry_workers = retry_status.get("workers_authorized", -1)
-            print(f"{device} retry: {retry_workers} workers authorized")
-
-            # Track failure regardless of retry result
+        
+            # Increment failure counter BEFORE attempting retry
             failure_counters[normalized_device] = failure_counters.get(normalized_device, 0) + 1
-            
-            if retry_workers == 0:
-                print(f"❌ {device} still has 0 workers. Failure count: {failure_counters[normalized_device]}/5")
-            else:
-                print(f"✅ {device} recovered after restart. Workers: {retry_workers}")
-                failure_counters[normalized_device] = 0
-            
-            # Restart container if threshold hit
+            print(f"❌ {device} failure count: {failure_counters[normalized_device]}/5")
+        
+            # Escalate if 5 failures reached
             if failure_counters[normalized_device] >= 5:
                 print(f"🔥 Restarting container for {device}")
                 restart_docker_container(device, config)
-                failure_counters[normalized_device] = 0  # Reset after restart
-
-
+                failure_counters[normalized_device] = 0  # Reset after escalation
+                continue  # Skip retry after hard restart
+            
+            # Attempt soft recovery
+            resolve_device_issue(device, config)
+    
 
 def send_discord_message(config, message):
     webhook_url = config.get("discord_webhook")

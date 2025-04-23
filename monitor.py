@@ -153,6 +153,13 @@ def check_and_resolve(config):
         workers_authorized = device_status.get("workers_authorized", -1)
         print(f"{device}: {workers_authorized} workers authorized")
 
+        # Device recovered successfully after previous issues
+        if workers_authorized > 0 and failure_counters.get(normalized_device, 0) > 0:
+            recovery_message = f"✅ {device} recovered successfully after failure count of {failure_counters[normalized_device]}."
+            print(recovery_message)
+            send_discord_message(config, recovery_message)
+            failure_counters[normalized_device] = 0  # Reset after recovery
+
         if workers_authorized == 0:
             print(f"{device} has 0 authorized workers. Attempting resolution...")
         
@@ -169,7 +176,6 @@ def check_and_resolve(config):
             
             # Attempt soft recovery
             resolve_device_issue(device, config)
-    
 
 def send_discord_message(config, message):
     webhook_url = config.get("discord_webhook")

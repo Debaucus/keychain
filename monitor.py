@@ -86,7 +86,7 @@ def restart_docker_container(device_name, config):
     finally:
         # Always reset failure counter even if restart fails
         normalized_device = device_name.strip().lower()
-        failure_counters[normalized_device] = 0
+        failure_counters[normalized_device] = 1 # Reset to 1 so you always get the confirm it has returned online.
 
 def resolve_device_issue(device, config):
     base_url = config["urls"]["rotom"]

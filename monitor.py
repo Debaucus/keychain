@@ -2,14 +2,16 @@ import time
 import requests
 import yaml
 import json
+import subprocess
+
+failure_counters = {}
 
 def load_config(path="config.yaml"):
     with open(path, "r") as f:
         return yaml.safe_load(f)
 
 def get_device_status(config):
-    device_count = len(config["devices"])
-    limit = device_count + 1
+    limit = config["total_devices"]
 
     base_url = config["urls"]["status"]
     discord_id = config.get("discord_id")
@@ -45,6 +47,32 @@ def get_device_status(config):
         error_message = f"🔴 Error contacting status endpoint: {e}"
         print(error_message)
         raise
+
+def restart_docker_container(device_name, config):
+    container_name = config.get("docker_containers", {}).get(device_name)
+    if not container_name:
+        print(f"❌ No container mapped for {device_name}")
+        return
+
+    container_path = config.get("docker_container_path")
+    if not container_path:
+        print("❌ Docker container path not set in config.")
+        return
+
+    try:
+        subprocess.run(
+            ["docker-compose", "restart", container_name],
+            cwd=container_path,
+            check=True
+        )
+        msg = f"<@{config['discord_id']}> Restarted Docker container `{container_name}` for device `{device_name}` after 5 failures."
+        print(msg)
+        send_discord_message(config, msg)
+    except subprocess.CalledProcessError as e:
+        error_msg = f"🔴 Docker restart failed for {container_name}: {e}"
+        print(error_msg)
+        send_discord_message(config, error_msg)
+
 
 def resolve_device_issue(device, config):
     base_url = config["urls"]["rotom"]
@@ -118,6 +146,19 @@ def check_and_resolve(config):
             retry_status = retry_map.get(normalized_device, {})
             retry_workers = retry_status.get("workers_authorized", -1)
             print(f"{device} retry: {retry_workers} workers authorized")
+
+            if retry_workers == 0:
+                # Track failures
+                failure_counters[normalized_device] = failure_counters.get(normalized_device, 0) + 1
+                print(f"❌ {device} failure count: {failure_counters[normalized_device]}/5")
+
+                if failure_counters[normalized_device] >= 5:
+                    print(f"🔥 Restarting container for {device}")
+                    restart_docker_container(device, config)
+                    failure_counters[normalized_device] = 0  # Reset after restart
+            else:
+                failure_counters[normalized_device] = 0  # Reset on recovery
+
 
 def send_discord_message(config, message):
     webhook_url = config.get("discord_webhook")

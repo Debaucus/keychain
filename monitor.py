@@ -61,7 +61,7 @@ def restart_docker_container(device_name, config):
 
     try:
         subprocess.run(
-            ["docker", "compose", "restart", container_name],
+            ["docker", "container", "restart", container_name],
             cwd=container_path,
             check=True
         )

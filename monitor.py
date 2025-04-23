@@ -153,17 +153,21 @@ def check_and_resolve(config):
             retry_workers = retry_status.get("workers_authorized", -1)
             print(f"{device} retry: {retry_workers} workers authorized")
 
+            # Track failure regardless of retry result
+            failure_counters[normalized_device] = failure_counters.get(normalized_device, 0) + 1
+            
             if retry_workers == 0:
-                # Track failures
-                failure_counters[normalized_device] = failure_counters.get(normalized_device, 0) + 1
-                print(f"❌ {device} failure count: {failure_counters[normalized_device]}/5")
-
-                if failure_counters[normalized_device] >= 5:
-                    print(f"🔥 Restarting container for {device}")
-                    restart_docker_container(device, config)
-                    failure_counters[normalized_device] = 0  # Reset after restart
+                print(f"❌ {device} still has 0 workers. Failure count: {failure_counters[normalized_device]}/5")
             else:
-                failure_counters[normalized_device] = 0  # Reset on recovery
+                print(f"✅ {device} recovered after restart. Workers: {retry_workers}")
+                failure_counters[normalized_device] = 0
+            
+            # Restart container if threshold hit
+            if failure_counters[normalized_device] >= 5:
+                print(f"🔥 Restarting container for {device}")
+                restart_docker_container(device, config)
+                failure_counters[normalized_device] = 0  # Reset after restart
+
 
 
 def send_discord_message(config, message):

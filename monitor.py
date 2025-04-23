@@ -61,7 +61,7 @@ def restart_docker_container(device_name, config):
 
     try:
         subprocess.run(
-            ["docker-compose", "restart", container_name],
+            ["docker", "compose", "restart", container_name],
             cwd=container_path,
             check=True
         )
@@ -185,8 +185,8 @@ def main():
             check_and_resolve(config)
         except Exception as e:
             print(f"Error during check: {e}")
-        print("Waiting 5 minutes for next check...\n")
-        time.sleep(300)
+        print("Waiting 1 minute for next check...\n")
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()

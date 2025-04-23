@@ -3,7 +3,7 @@ logging: "debug" # Debug or Info. Level of logging shown in console.
 session_cookie: "" # Use a browser console to get this after Klefki login. Must be updated on Klefki restart. 
 discord_id: "" # Used in Klefki API. Your User ID on Discord.
 discord_webhook: "" # Webhook used to send updates/errors.
-total_devices: 10 # Total device count for all scanners/containers/attest.
+total_devices: 10 # Total device count for all scanners/containers/attest. Not just local ones.
 
 # API URLs
 urls:

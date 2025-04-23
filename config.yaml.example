@@ -1,14 +1,28 @@
+# General Settings
 logging: "debug" # Debug or Info. Level of logging shown in console.
 session_cookie: "" # Use a browser console to get this after Klefki login. Must be updated on Klefki restart. 
-discord_id: "" # Used in Klefki API. 
+discord_id: "" # Used in Klefki API. Your User ID on Discord.
 discord_webhook: "" # Webhook used to send updates/errors.
+total_devices: 10 # Total device count for all scanners/containers/attest.
+
+# API URLs
+urls:
+  status: "https://api.klefkiv2.sylvie.fyi/api/v1/devices/" # Klefki API URL
+  rotom: "" # Your Rotom URL, include port if required.
+
+# Rotom Auth Settings
 auth:
   user: "" # Leave empty if no Rotom auth user
   pass: "" # Leave empty if no Rotom auth pass
-urls:
-  status: "https://api.klefkiv2.sylvie.fyi/api/v1/devices/" # Klefki API URL
-  rotom: "" # Your Rotom URL, include port.
-devices: # List ALL devices. Include 0 config devices if using deviceless.
+
+# Docker Settings
+docker_container_path: "/path/to/docker/containers" # Where to run the docker restart command.
+docker_containers: # Container names related to the device.
+  device1: redroid1
+  Device 2: redroid2
+
+# Device Settings
+devices: # List local devices where keychain is being run.
   device1: 5
   Device 2: 5
   device 3: 0
